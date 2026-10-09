@@ -45,10 +45,15 @@
       font-size: 15vw;
       font-variant-numeric: tabular-nums;
     }
-    .theme-toggle {
+    .toggles {
       position: fixed;
       right: 16px;
       bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .toggle {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -56,13 +61,13 @@
       cursor: pointer;
       user-select: none;
     }
-    .theme-toggle input {
+    .toggle input {
       position: absolute;
       opacity: 0;
       width: 0;
       height: 0;
     }
-    .theme-toggle .track {
+    .toggle .track {
       position: relative;
       width: 44px;
       height: 24px;
@@ -70,7 +75,7 @@
       background: var(--track);
       transition: background 0.3s;
     }
-    .theme-toggle .track::after {
+    .toggle .track::after {
       content: '';
       position: absolute;
       top: 3px;
@@ -82,11 +87,13 @@
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
       transition: transform 0.3s, background 0.3s;
     }
-    .theme-toggle input:checked + .track::after {
+    .toggle input:checked + .track::after {
       transform: translateX(20px);
+    }
+    #theme-switch:checked + .track::after {
       background: #111;
     }
-    .theme-toggle input:focus-visible + .track {
+    .toggle input:focus-visible + .track {
       outline: 2px solid var(--fg);
       outline-offset: 2px;
     }
@@ -94,24 +101,51 @@
 </head>
 <body>
   <div id="clock"></div>
-  <label class="theme-toggle">
-    <span aria-hidden="true">☀</span>
-    <input type="checkbox" id="theme-switch" role="switch" aria-label="Dark Theme">
-    <span class="track"></span>
-    <span aria-hidden="true">☾</span>
-  </label>
+  <div class="toggles">
+    <label class="toggle">
+      <span>秒</span>
+      <input type="checkbox" id="seconds-switch" role="switch" aria-label="Show Seconds">
+      <span class="track"></span>
+    </label>
+    <label class="toggle">
+      <span aria-hidden="true">☀</span>
+      <input type="checkbox" id="theme-switch" role="switch" aria-label="Dark Theme">
+      <span class="track"></span>
+      <span aria-hidden="true">☾</span>
+    </label>
+  </div>
   <script>
     const clock = document.getElementById('clock');
     const pad = (n) => String(n).padStart(2, '0');
 
+    // load saved seconds setting (shown by default)
+    let showSeconds = true;
+    try { showSeconds = localStorage.getItem('showSeconds') !== 'false'; } catch (e) {}
+
+    function render() {
+      const now = new Date();
+      let text = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      if (showSeconds) text += `:${pad(now.getSeconds())}`;
+      clock.textContent = text;
+      return now;
+    }
+
     function update() {
       // update the clock by second
-      const now = new Date();
-      clock.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const now = render();
       setTimeout(update, 1000 - now.getMilliseconds());
     }
 
     update();
+
+    const secondsSwitch = document.getElementById('seconds-switch');
+    secondsSwitch.checked = showSeconds;
+    secondsSwitch.addEventListener('change', () => {
+      // Toggle seconds display
+      showSeconds = secondsSwitch.checked;
+      render();
+      try { localStorage.setItem('showSeconds', showSeconds); } catch (e) {} // save seconds setting
+    });
 
     const themeSwitch = document.getElementById('theme-switch');
     themeSwitch.checked = document.documentElement.dataset.theme === 'dark';
