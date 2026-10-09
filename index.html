@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clock</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: #222;
+      font-family: system-ui, sans-serif;
+    }
+    #clock {
+      font-size: 15vw;
+      font-variant-numeric: tabular-nums;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #111;
+        color: #eee;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="clock"></div>
+  <script>
+    const clock = document.getElementById('clock');
+    const pad = (n) => String(n).padStart(2, '0');
+
+    function update() {
+      const now = new Date();
+      clock.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      setTimeout(update, 1000 - now.getMilliseconds());
+    }
+
+    update();
+  </script>
+</body>
+</html>
