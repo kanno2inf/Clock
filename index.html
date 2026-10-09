@@ -4,7 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clock</title>
+  <script>
+    // load saved theme or use OS preference
+    (() => {
+      let theme;
+      try { theme = localStorage.getItem('theme'); } catch (e) {}
+      if (theme !== 'light' && theme !== 'dark') {
+        theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
   <style>
+    :root {
+      --bg: #fff;
+      --fg: #222;
+      --track: #ccc;
+      --knob: #fff;
+    }
+    :root[data-theme="dark"] {
+      --bg: #111;
+      --fg: #eee;
+      --track: #555;
+      --knob: #eee;
+    }
     html, body {
       height: 100%;
       margin: 0;
@@ -13,35 +36,91 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #fff;
-      color: #222;
+      background: var(--bg);
+      color: var(--fg);
       font-family: system-ui, sans-serif;
+      transition: background 0.3s, color 0.3s;
     }
     #clock {
       font-size: 15vw;
       font-variant-numeric: tabular-nums;
     }
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: #111;
-        color: #eee;
-      }
+    .theme-toggle {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .theme-toggle input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .theme-toggle .track {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      border-radius: 12px;
+      background: var(--track);
+      transition: background 0.3s;
+    }
+    .theme-toggle .track::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--knob);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s, background 0.3s;
+    }
+    .theme-toggle input:checked + .track::after {
+      transform: translateX(20px);
+      background: #111;
+    }
+    .theme-toggle input:focus-visible + .track {
+      outline: 2px solid var(--fg);
+      outline-offset: 2px;
     }
   </style>
 </head>
 <body>
   <div id="clock"></div>
+  <label class="theme-toggle">
+    <span aria-hidden="true">☀</span>
+    <input type="checkbox" id="theme-switch" role="switch" aria-label="Dark Theme">
+    <span class="track"></span>
+    <span aria-hidden="true">☾</span>
+  </label>
   <script>
     const clock = document.getElementById('clock');
     const pad = (n) => String(n).padStart(2, '0');
 
     function update() {
+      // update the clock by second
       const now = new Date();
       clock.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       setTimeout(update, 1000 - now.getMilliseconds());
     }
 
     update();
+
+    const themeSwitch = document.getElementById('theme-switch');
+    themeSwitch.checked = document.documentElement.dataset.theme === 'dark';
+    themeSwitch.addEventListener('change', () => {
+      // Toggle dark/light theme
+      const theme = themeSwitch.checked ? 'dark' : 'light';
+      document.documentElement.dataset.theme = theme;
+      try { localStorage.setItem('theme', theme); } catch (e) {} // save theme setting
+    });
   </script>
 </body>
 </html>
