@@ -122,6 +122,20 @@
       outline: 2px solid var(--fg);
       outline-offset: 2px;
     }
+    /* smartphones: larger text placed toward the top */
+    @media (max-width: 600px) {
+      body {
+        align-items: flex-start;
+        padding-top: 15vh;
+        box-sizing: border-box;
+      }
+      #clock {
+        font-size: 22vw;
+      }
+      .toggles {
+        bottom: 48px;
+      }
+    }
   </style>
 </head>
 <body>
