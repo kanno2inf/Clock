@@ -45,6 +45,30 @@
       font-size: 15vw;
       font-variant-numeric: tabular-nums;
     }
+    #minute-bar {
+      height: max(1px, 0.4vw);
+      width: 0;
+      background: var(--fg);
+      transition: background 0.3s;
+    }
+    .hour-bar {
+      position: fixed;
+      height: 1.7px;
+      width: 0;
+      background: linear-gradient(to right, #7bbef5eb, #739fd97d);
+      background-size: 100vw 100%; /* gradient spans the full screen and is revealed as the bar grows */
+    }
+    #hour-bar-bottom {
+      left: 0;
+      bottom: 0;
+    }
+    #hour-bar-top {
+      right: 0;
+      top: 0;
+      /* mirrored: grows from the right */
+      background-image: linear-gradient(to left, #7bbef5eb, #739fd97d);
+      background-position: right;
+    }
     .toggles {
       position: fixed;
       right: 16px;
@@ -100,7 +124,10 @@
   </style>
 </head>
 <body>
-  <div id="clock"></div>
+  <div>
+    <div id="clock"></div>
+    <div id="minute-bar"></div>
+  </div>
   <div class="toggles">
     <label class="toggle">
       <span>秒</span>
@@ -114,8 +141,12 @@
       <span aria-hidden="true">☾</span>
     </label>
   </div>
+  <div class="hour-bar" id="hour-bar-top"></div>
+  <div class="hour-bar" id="hour-bar-bottom"></div>
   <script>
     const clock = document.getElementById('clock');
+    const minuteBar = document.getElementById('minute-bar');
+    const hourBars = document.querySelectorAll('.hour-bar');
     const pad = (n) => String(n).padStart(2, '0');
 
     // load saved seconds setting (shown by default)
@@ -127,6 +158,11 @@
       let text = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
       if (showSeconds) text += `:${pad(now.getSeconds())}`;
       clock.textContent = text;
+      // progress of the current minute
+      minuteBar.style.width = `${now.getSeconds() / 60 * 100}%`;
+      // progress of the current hour
+      const elapsed = now.getMinutes() * 60 + now.getSeconds();
+      hourBars.forEach((bar) => { bar.style.width = `${elapsed / 3600 * 100}%`; });
       return now;
     }
 
