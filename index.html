@@ -225,14 +225,16 @@
       // arc spans the whole screen: centered at the bottom edge, reaching both sides and near the top
       const w = innerWidth;
       const h = innerHeight;
-      const size = Math.max(12, Math.min(w, h) * 0.012); // half the glyph size of the sun / moon in px
+      const size = Math.max(8, Math.min(w, h) * 0.012); // half the glyph size of the sun / moon in px
       const rx = w / 2 - size * 2;
-      const ry = h - size * 2;
+      const ry = Math.min(h - size * 2, rx); // never taller than wide, so a portrait screen gets a semicircle instead of a squeezed arc
+      // baseline of the arc: bottom edge, or near the top on smartphones (same breakpoint as the CSS)
+      const base = matchMedia('(max-width: 600px)').matches ? ry + size * 2 : h;
       dayArc.setAttribute('viewBox', `0 0 ${w} ${h}`);
-      arcPath.setAttribute('d', `M ${w / 2 - rx} ${h} A ${rx} ${ry} 0 0 1 ${w / 2 + rx} ${h}`);
+      arcPath.setAttribute('d', `M ${w / 2 - rx} ${base} A ${rx} ${ry} 0 0 1 ${w / 2 + rx} ${base}`);
       const angle = Math.PI * (1 - progress);
       const x = w / 2 + rx * Math.cos(angle);
-      const y = h - ry * Math.sin(angle);
+      const y = base - ry * Math.sin(angle);
       const [shown, hidden] = isDay ? [sun, moon] : [moon, sun];
       shown.setAttribute('x', x);
       shown.setAttribute('y', y);
