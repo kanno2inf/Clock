@@ -93,8 +93,8 @@
     }
     .toggles {
       position: fixed;
-      right: 16px;
-      bottom: 16px;
+      right: 48px;
+      bottom: 32px;
       display: flex;
       align-items: center;
       gap: 24px;
@@ -144,7 +144,7 @@
       outline-offset: 2px;
     }
     /* smartphones: larger text placed toward the top */
-    @media (max-width: 600px) {
+    @media (orientation: portrait) {
       body {
         flex-direction: column;
         justify-content: flex-start;
@@ -208,11 +208,14 @@
       let text = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
       if (showSeconds) text += `:${pad(now.getSeconds())}`;
       clock.textContent = text;
+      
       // progress of the current minute
       minuteBar.style.width = `${now.getSeconds() / 60 * 100}%`;
+      
       // progress of the current hour
       const elapsed = now.getMinutes() * 60 + now.getSeconds();
       hourBars.forEach((bar) => { bar.style.width = `${elapsed / 3600 * 100}%`; });
+
       renderSky(now);
       return now;
     }
@@ -227,9 +230,11 @@
       const h = innerHeight;
       const size = Math.max(8, Math.min(w, h) * 0.012); // half the glyph size of the sun / moon in px
       const rx = w / 2 - size * 2;
-      const ry = Math.min(h - size * 2, rx); // never taller than wide, so a portrait screen gets a semicircle instead of a squeezed arc
-      // baseline of the arc: bottom edge, or near the top on smartphones (same breakpoint as the CSS)
-      const base = matchMedia('(max-width: 600px)').matches ? ry + size * 2 : h;
+      const portrait = matchMedia('(orientation: portrait)').matches; // same breakpoint as the CSS
+      const bottomGap = portrait ? 0 : 48; // space between the baseline and the bottom edge in px
+      const ry = Math.min(h - bottomGap - size * 2, rx); // never taller than wide, so a portrait screen gets a semicircle instead of a squeezed arc
+      // baseline of the arc: 48px above the bottom edge, or near the top on smartphones
+      const base = portrait ? ry + size * 2 : h - bottomGap;
       dayArc.setAttribute('viewBox', `0 0 ${w} ${h}`);
       arcPath.setAttribute('d', `M ${w / 2 - rx} ${base} A ${rx} ${ry} 0 0 1 ${w / 2 + rx} ${base}`);
       const angle = Math.PI * (1 - progress);
